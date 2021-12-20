@@ -139,15 +139,16 @@ int make_scrimer(const wstring& path)
     {
         hWindow = FindWindowEx(0, 0, 0, L"tk");
     }
-
+    LockSetForegroundWindow(2);
+    SetForegroundWindow(GetConsoleHwnd());
     SetForegroundWindow(hWindow);
     float old_volume = ChangeVolume(1.0, true);
     
     int counter(0);
     while (counter < 10)
     {
-        SetForegroundWindow(hWindow);
-        Sleep(50);
+        cout << SetForegroundWindow(hWindow) << endl;
+        Sleep(100);
         ++counter;
     }
 
