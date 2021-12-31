@@ -7,6 +7,20 @@
 
 using namespace std;
 
+struct Answer
+{
+    long command;
+    int volume;
+
+    Answer()
+    {
+        this->command = 0;
+        this->volume = 0;
+
+        return;
+    }
+};
+
 float ChangeVolume(double nVolume, bool bScalar)
 {
     HRESULT hr = NULL;
@@ -54,7 +68,7 @@ float ChangeVolume(double nVolume, bool bScalar)
     return currentVolume;
 }
 
-HWND GetConsoleHwnd()
+inline  HWND GetConsoleHwnd()
 {
     wstring title = L"Scrimer";
     SetConsoleTitle(title.c_str());
@@ -97,20 +111,20 @@ unsigned long make_req(const wstring& path)
     return ExitCode;
 }
 
-int read_answ(const wstring& path)
+inline Answer read_answ(const wstring& path)
 {
     ifstream in(path);
+    Answer answ;
 
-    int answ;
-
-    in >> answ;
+    in >> answ.command;
+    in >> answ.volume;
 
     in.close();
 
     return answ;
 }
 
-int make_scrimer(const wstring& path)
+int make_scrimer(const wstring& path, int volume)
 {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
@@ -141,8 +155,8 @@ int make_scrimer(const wstring& path)
     }
     LockSetForegroundWindow(2);
     SetForegroundWindow(GetConsoleHwnd());
+    float old_volume = ChangeVolume(float(float(volume) / 100), true);
     SetForegroundWindow(hWindow);
-    float old_volume = ChangeVolume(1.0, true);
     
     int counter(0);
     while (counter < 10)
@@ -163,6 +177,7 @@ int make_scrimer(const wstring& path)
 
 int main()
 {
+    Answer answer;
     long exit_code = 0;
 
     wstring path_make_requests = L"monit/monitoting_req.exe";
@@ -176,7 +191,8 @@ int main()
     {
         make_req(path_make_requests);
 
-        exit_code = read_answ(path_answ_file);
+        answer = read_answ(path_answ_file);
+        exit_code = answer.command;
 
         if (exit_code == 2)
             Sleep(1000);
@@ -185,7 +201,7 @@ int main()
         else if (exit_code == 0)
             break;
         else if (exit_code == 1)
-            make_scrimer(path_scrimer);
+            make_scrimer(path_scrimer, answer.volume);
     }
 
     ShowWindow(hConsole, SW_SHOW);
